@@ -2,13 +2,15 @@ import os
 from tkinter import *
 from tkinter.messagebox import *
 from tkinter.filedialog import *
+import tkinter as tk
+from tkinter import font
 
 class Drascii:
 
 	__root = Tk()
 
 	# default window width and height
-	__thisTextArea = Text(__root, font=("TkFixedFont"))
+	__thisTextArea = Text(__root)
 	__thisMenuBar = Menu(__root)
 	__thisFileMenu = Menu(__thisMenuBar, tearoff=0)
 	__thisHelpMenu = Menu(__thisMenuBar, tearoff=0)
@@ -93,12 +95,19 @@ class Drascii:
 		self.__thisScrollBar.config(command=self.__thisTextArea.yview)	 
 		self.__thisTextArea.config(yscrollcommand=self.__thisScrollBar.set)
 
+		#######################################options (to be added on a menu later)#######################################################
+		
+		self.__thisTextArea.configure(font=("TkFixedFont", 12))
+		self.__thisTextArea.bind('<Button-1>', self.__handle_click)
+
 		self.setBackground("black")
 		self.setForeground("white")
 		self.setSelected("red")
 
 		self.__root.bind("<Control-plus>", self.zoomIn)
 		self.__root.bind("<Control-minus>", self.zoomOut)
+
+		#########################################################################################################################################
 		
 	def __quitApplication(self):
 		self.__root.destroy()
@@ -162,6 +171,18 @@ class Drascii:
 			file.write(self.__thisTextArea.get(1.0,END))
 			file.close()
 
+	def run(self):
+		self.__root.mainloop()
+
+	def setBackground(self, color):
+		self.__thisTextArea.configure(bg=color)
+
+	def setForeground(self, color):
+		self.__thisTextArea.configure(fg=color)
+
+	def setSelected(self, color):
+		self.__thisTextArea.configure(selectbackground=color)	
+
 	def zoomIn(self, event=None):
 		current_size = int(self.__thisTextArea.cget("font").split()[1])
 		new_size = current_size + 2
@@ -172,17 +193,34 @@ class Drascii:
 		new_size = current_size - 2
 		self.__thisTextArea.configure(font=("TkFixedFont", new_size))
 
-	def setBackground(self, color):
-		self.__thisTextArea.configure(bg=color)
+	def __handle_click(self, event):
+		font_name, font_size = self.__thisTextArea.cget("font").split()
+		font_size = int(font_size)
+		font_object = font.Font(family=font_name, size=font_size)
+		font_height = font_object.metrics("linespace")
+		font_width = font_object.measure(" ")
 
-	def setForeground(self, color):
-		self.__thisTextArea.configure(fg=color)
+		click_line = int(event.y / font_height)
+		click_column = int(event.x / font_width)
 
-	def setSelected(self, color):
-		self.__thisTextArea.configure(selectbackground=color)
-		
-	def run(self):
-		self.__root.mainloop()
+		# Add lines
+		num_lines = int(self.__thisTextArea.index('end').split('.')[0]) - 2
+		while click_line > num_lines:
+			self.__thisTextArea.insert('end', "\n")
+			num_lines += 1
+
+		# Add columns
+		num_columns = len(self.__thisTextArea.get(f"{click_line}.0", f"{click_line}.end"))
+		while click_column > num_columns:
+			self.__thisTextArea.insert(f"{click_line}.end", " ")
+			num_columns += 1
+
+		self.__thisTextArea.delete(f"{click_line}.{click_column}")
+		self.__thisTextArea.insert(f"{click_line}.{click_column}", 'a')
 
 drascii = Drascii(width=1280,height=720)
 drascii.run()
+
+
+
+
