@@ -9,11 +9,12 @@ class Drascii:
 
 	root = Tk()
 
-	textArea = Text(root)
+	textArea = Text(root, wrap=NONE)
 	menuBar = Menu(root)
 	fileMenu = Menu(menuBar, tearoff=0)
 	helpMenu = Menu(menuBar, tearoff=0)
-	verticalScroll = Scrollbar(textArea)	 
+	verticalScroll = Scrollbar(textArea)
+	horizontalScroll = Scrollbar(textArea, orient=HORIZONTAL) 
 	file = None
 
 	def __init__(self,**kwargs):
@@ -71,6 +72,10 @@ class Drascii:
 		self.verticalScroll.pack(side=RIGHT,fill=Y) 
 		self.verticalScroll.config(command=self.textArea.yview)	 
 		self.textArea.config(yscrollcommand=self.verticalScroll.set)
+
+		self.horizontalScroll.pack(side=BOTTOM,fill=X) 
+		self.horizontalScroll.config(command=self.textArea.xview)	 
+		self.textArea.config(xscrollcommand=self.horizontalScroll.set)
 
 		#######################################options (to be added on a menu later)#######################################################
 		
