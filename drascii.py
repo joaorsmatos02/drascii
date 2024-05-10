@@ -2,7 +2,6 @@ import os
 from tkinter import *
 from tkinter.messagebox import *
 from tkinter.filedialog import *
-import tkinter as tk
 from tkinter import font
 
 class Drascii:
@@ -88,6 +87,7 @@ class Drascii:
 
 		self.root.bind("<Control-plus>", self.zoomIn)
 		self.root.bind("<Control-minus>", self.zoomOut)
+		self.root.bind("<Control-MouseWheel>", self.zoomWithMouseWheel)
 
 		#########################################################################################################################################
 		
@@ -158,6 +158,12 @@ class Drascii:
 		new_size = current_size - 2
 		self.textArea.configure(font=("TkFixedFont", new_size))
 
+	def zoomWithMouseWheel(self, event):
+		if event.delta > 0:
+			self.zoomIn()
+		else:
+			self.zoomOut()
+
 	def __handle_click(self, event):
 		font_name, font_size = self.textArea.cget("font").split()
 		font_size = int(font_size)
@@ -165,22 +171,27 @@ class Drascii:
 		font_height = font_object.metrics("linespace")
 		font_width = font_object.measure(" ")
 
-		click_line = int(event.y / font_height)
-		click_column = int(event.x / font_width)
+		# has to account for zoom
+		outsideViewX = max([len(self.textArea.get(f"{x}.0", f"{x}.end")) for x in range(0, int(self.textArea.index('end').split('.')[0]))]) * self.textArea.xview()[0]
+		outsideViewY = int(self.textArea.index('end').split('.')[0]) * self.textArea.yview()[0]
+		
+		click_line = int(event.y / font_height) + int(outsideViewY)
+		click_column = int(event.x / font_width) + int(outsideViewX)
 
-		# Add lines
-		num_lines = int(self.textArea.index('end').split('.')[0]) - 2
+		# add lines
+		num_lines = int(self.textArea.index('end').split('.')[0])
 		while click_line > num_lines:
 			self.textArea.insert('end', "\n")
 			num_lines += 1
 
-		# Add columns
+		# add columns
 		num_columns = len(self.textArea.get(f"{click_line}.0", f"{click_line}.end"))
 		while click_column > num_columns:
 			self.textArea.insert(f"{click_line}.end", " ")
 			num_columns += 1
 
-		self.textArea.delete(f"{click_line}.{click_column}")
+		if not self.textArea.get(f"{click_line}.{click_column}") == '\n':
+			self.textArea.delete(f"{click_line}.{click_column}")
 		self.textArea.insert(f"{click_line}.{click_column}", 'a')
 
 drascii = Drascii(width=1280,height=720)
