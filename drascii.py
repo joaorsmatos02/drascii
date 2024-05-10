@@ -78,12 +78,14 @@ class Drascii:
 
 		#######################################options (to be added on a menu later)#######################################################
 		
-		self.textArea.configure(font=("TkFixedFont", 12))
-		self.textArea.bind('<Button-1>', self.__handle_click)
+		self.textArea.configure(font=("Consolas", 12))
+
+		self.textArea.bind("<Button-1>", self.__handle_click)
+		self.textArea.bind("<B1-Motion>", self.__handle_click)
 
 		self.setBackground("black")
 		self.setForeground("white")
-		self.setSelected("red")
+		self.setSelected("black")
 
 		self.root.bind("<Control-plus>", self.zoomIn)
 		self.root.bind("<Control-minus>", self.zoomOut)
@@ -151,12 +153,12 @@ class Drascii:
 	def zoomIn(self, event=None):
 		current_size = int(self.textArea.cget("font").split()[1])
 		new_size = current_size + 2
-		self.textArea.configure(font=("TkFixedFont", new_size))
+		self.textArea.configure(font=("Consolas", new_size))
 
 	def zoomOut(self, event=None):
 		current_size = int(self.textArea.cget("font").split()[1])
 		new_size = current_size - 2
-		self.textArea.configure(font=("TkFixedFont", new_size))
+		self.textArea.configure(font=("Consolas", new_size))
 
 	def zoomWithMouseWheel(self, event):
 		if event.delta > 0:
@@ -177,9 +179,13 @@ class Drascii:
 		
 		click_line = int(event.y / font_height) + int(outsideViewY)
 		click_column = int(event.x / font_width) + int(outsideViewX)
+		
+		if click_line < 1 or click_column < 0:
+			return
 
 		# add lines
-		num_lines = int(self.textArea.index('end').split('.')[0])
+		num_lines = int(self.textArea.index('end').split('.')[0]) - 1
+		print(num_lines)
 		while click_line > num_lines:
 			self.textArea.insert('end', "\n")
 			num_lines += 1
@@ -192,7 +198,7 @@ class Drascii:
 
 		if not self.textArea.get(f"{click_line}.{click_column}") == '\n':
 			self.textArea.delete(f"{click_line}.{click_column}")
-		self.textArea.insert(f"{click_line}.{click_column}", 'a')
+		self.textArea.insert(f"{click_line}.{click_column}", 'x')
 
 drascii = Drascii(width=1280,height=720)
 drascii.run()
