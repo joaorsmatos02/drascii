@@ -52,9 +52,7 @@ class Drascii:
 		left = (screenWidth / 2) - (self.width / 2) 
 		top = (screenHeight / 2) - (self.height /2) 
 
-		self.root.geometry('%dx%d+%d+%d' % (self.width,
-											self.height,
-											left, top)) 
+		self.root.geometry('%dx%d+%d+%d' % (self.width, self.height, left, top)) 
 
 		# To make the textarea auto resizable
 		self.root.grid_rowconfigure(0, weight=1)
@@ -63,24 +61,17 @@ class Drascii:
 		# Add controls (widget)
 		self.textArea.grid(sticky = N + E + S + W)
 		
-		self.fileMenu.add_command(label="New",
-										command=self.__newFile) 
-		self.fileMenu.add_command(label="Open",
-										command=self.__openFile)
-		self.fileMenu.add_command(label="Save",
-										command=self.__saveFile) 
+		self.fileMenu.add_command(label="New", command=self.__newFile) 
+		self.fileMenu.add_command(label="Open", command=self.__openFile)
+		self.fileMenu.add_command(label="Save", command=self.__saveFile) 
 
 
 		self.fileMenu.add_separator()										 
-		self.fileMenu.add_command(label="Exit",
-										command=self.__quitApplication)
-		self.menuBar.add_cascade(label="File",
-									menu=self.fileMenu)	 
+		self.fileMenu.add_command(label="Exit", command=self.__quitApplication)
+		self.menuBar.add_cascade(label="File", menu=self.fileMenu)	 
 		
-		self.helpMenu.add_command(label="About Notepad",
-										command=self.__showAbout) 
-		self.menuBar.add_cascade(label="Help",
-									menu=self.helpMenu)
+		self.helpMenu.add_command(label="About Notepad", command=self.__showAbout) 
+		self.menuBar.add_cascade(label="Help", menu=self.helpMenu)
 
 		self.root.config(menu=self.menuBar)
 
@@ -107,7 +98,6 @@ class Drascii:
 		self.root.bind("<Control-plus>", self.zoomIn)
 		self.root.bind("<Control-minus>", self.zoomOut)
 		self.root.bind("<Control-MouseWheel>", self.zoomWithMouseWheel)
-		self.root.bind("<F1>", self.changeMode)
 		self.textArea.bind("<KeyPress>", self.onKeyPressed)
 
 		#########################################################################################################################################
@@ -186,7 +176,7 @@ class Drascii:
 		else:
 			self.zoomOut()
 
-	def changeMode(self, event=None):
+	def changeMode(self):
 		if self.mode == "draw":
 			self.mode = "write"
 			self.setSelected(self.writeSelectedColor)
@@ -195,6 +185,15 @@ class Drascii:
 			self.mode = "draw"
 			self.setSelected(self.drawSelectedColor)
 			self.setInsert(self.drawInsertColor)
+
+	def onKeyPressed(self, event):
+		if event.keysym == "F1":
+			self.changeMode()
+		if event.char and event.char.isprintable():
+			self.currentChar = event.char
+		if self.mode == "draw":
+			return "break"
+		return None
 
 	def handleClick(self, event):
 		fontObject = font.Font(family=self.currentFont, size=self.fontSize)
@@ -231,15 +230,7 @@ class Drascii:
 				self.textArea.delete(f"{clickLine}.{clickColumn}")
 			self.textArea.insert(f"{clickLine}.{clickColumn}", self.currentChar[0])
 
-	def onKeyPressed(self, event):
-		if event.char and event.char.isprintable():
-			self.currentChar = event.char
-		if self.mode == "draw":
-			return "break"
-		return None
 		
-			
-
 drascii = Drascii(width=1280,height=720)
 drascii.run()
 
