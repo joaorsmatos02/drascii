@@ -21,6 +21,7 @@ class Drascii:
 	fontSize = 12
 	cursor = "tcross"
 
+	currentChar = ' '
 	drawBackgroundColor = "black"
 	drawForegroundColor = "white"
 	drawSelectedColor = "black"
@@ -107,6 +108,7 @@ class Drascii:
 		self.root.bind("<Control-minus>", self.zoomOut)
 		self.root.bind("<Control-MouseWheel>", self.zoomWithMouseWheel)
 		self.root.bind("<F1>", self.changeMode)
+		self.textArea.bind("<KeyPress>", self.onKeyPressed)
 
 		#########################################################################################################################################
 		
@@ -227,8 +229,16 @@ class Drascii:
 		if self.mode == "draw":
 			if not self.textArea.get(f"{clickLine}.{clickColumn}") == '\n':
 				self.textArea.delete(f"{clickLine}.{clickColumn}")
-			self.textArea.insert(f"{clickLine}.{clickColumn}", 'x')
+			self.textArea.insert(f"{clickLine}.{clickColumn}", self.currentChar[0])
 
+	def onKeyPressed(self, event):
+		if event.char and event.char.isprintable():
+			self.currentChar = event.char
+		if self.mode == "draw":
+			return "break"
+		return None
+		
+			
 
 drascii = Drascii(width=1280,height=720)
 drascii.run()
