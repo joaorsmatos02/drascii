@@ -12,9 +12,24 @@ class Drascii:
 	menuBar = Menu(root)
 	fileMenu = Menu(menuBar, tearoff=0)
 	helpMenu = Menu(menuBar, tearoff=0)
-	verticalScroll = Scrollbar(textArea)
-	horizontalScroll = Scrollbar(textArea, orient=HORIZONTAL) 
+	#verticalScroll = Scrollbar(textArea)
+	#horizontalScroll = Scrollbar(textArea, orient=HORIZONTAL) 
 	file = None
+
+	mode = "draw"
+	currentFont = "Consolas"
+	fontSize = 12
+	cursor = "tcross"
+
+	drawBackgroundColor = "black"
+	drawForegroundColor = "white"
+	drawSelectedColor = "black"
+	drawInsertColor = "black"
+
+	writeBackgroundColor = "black"
+	writeForegroundColor = "white"
+	writeSelectedColor = "red"
+	writeInsertColor = "white"
 
 	def __init__(self,**kwargs):
 
@@ -68,34 +83,36 @@ class Drascii:
 
 		self.root.config(menu=self.menuBar)
 
-		self.verticalScroll.pack(side=RIGHT,fill=Y) 
-		self.verticalScroll.config(command=self.textArea.yview)	 
-		self.textArea.config(yscrollcommand=self.verticalScroll.set)
+		#self.verticalScroll.pack(side=RIGHT,fill=Y) 
+		#self.verticalScroll.config(command=self.textArea.yview)	 
+		#self.textArea.config(yscrollcommand=self.verticalScroll.set)
 
-		self.horizontalScroll.pack(side=BOTTOM,fill=X) 
-		self.horizontalScroll.config(command=self.textArea.xview)	 
-		self.textArea.config(xscrollcommand=self.horizontalScroll.set)
+		#self.horizontalScroll.pack(side=BOTTOM,fill=X) 
+		#self.horizontalScroll.config(command=self.textArea.xview)	 
+		#self.textArea.config(xscrollcommand=self.horizontalScroll.set)
 
 		#######################################options (to be added on a menu later)#######################################################
 		
-		self.textArea.configure(font=("Consolas", 12), cursor="tcross")
+		self.textArea.configure(font=(self.currentFont, self.fontSize), cursor=self.cursor)
 
-		self.textArea.bind("<Button-1>", self.__handle_click)
-		self.textArea.bind("<B1-Motion>", self.__handle_click)
+		self.textArea.bind("<Button-1>", self.handleClick)
+		self.textArea.bind("<B1-Motion>", self.handleClick)
 
-		self.setBackground("black")
-		self.setForeground("white")
-		self.setSelected("black")
+		self.setBackground(self.drawBackgroundColor)
+		self.setForeground(self.drawForegroundColor)
+		self.setSelected(self.drawSelectedColor)
+		self.setInsert(self.drawInsertColor)
 
 		self.root.bind("<Control-plus>", self.zoomIn)
 		self.root.bind("<Control-minus>", self.zoomOut)
 		self.root.bind("<Control-MouseWheel>", self.zoomWithMouseWheel)
+		self.root.bind("<F1>", self.changeMode)
 
 		#########################################################################################################################################
 		
 	def __quitApplication(self):
 		self.root.destroy()
-		# exit()
+		exit()
 
 	def __showAbout(self):
 		showinfo("Drascii","Mrinal Verma")
@@ -150,15 +167,16 @@ class Drascii:
 	def setSelected(self, color):
 		self.textArea.configure(selectbackground=color)	
 
+	def setInsert(self, color):
+		self.textArea.configure(insertbackground=color)
+
 	def zoomIn(self, event=None):
-		current_size = int(self.textArea.cget("font").split()[1])
-		new_size = current_size + 2
-		self.textArea.configure(font=("Consolas", new_size))
+		self.fontSize += 2
+		self.textArea.configure(font=(self.currentFont, self.fontSize))
 
 	def zoomOut(self, event=None):
-		current_size = int(self.textArea.cget("font").split()[1])
-		new_size = current_size - 2
-		self.textArea.configure(font=("Consolas", new_size))
+		self.fontSize -= 2
+		self.textArea.configure(font=(self.currentFont, self.fontSize))
 
 	def zoomWithMouseWheel(self, event):
 		if event.delta > 0:
@@ -166,12 +184,20 @@ class Drascii:
 		else:
 			self.zoomOut()
 
-	def __handle_click(self, event):
-		font_name, font_size = self.textArea.cget("font").split()
-		font_size = int(font_size)
-		font_object = font.Font(family=font_name, size=font_size)
-		font_height = font_object.metrics("linespace")
-		font_width = font_object.measure(" ")
+	def changeMode(self, event=None):
+		if self.mode == "draw":
+			self.mode = "write"
+			self.setSelected(self.writeSelectedColor)
+			self.setInsert(self.writeInsertColor)
+		else:
+			self.mode = "draw"
+			self.setSelected(self.drawSelectedColor)
+			self.setInsert(self.drawInsertColor)
+
+	def handleClick(self, event):
+		fontObject = font.Font(family=self.currentFont, size=self.fontSize)
+		fontHeight = fontObject.metrics("linespace")
+		fontWidth = fontObject.measure(" ")
 
 		# Calculate the visible portion of the text
 		rowsPerColumn = [len(self.textArea.get(f"{x}.0", f"{x}.end")) for x in range(int(self.textArea.index('end').split('.')[0]))]
@@ -179,28 +205,29 @@ class Drascii:
 		outsideViewsLines = int(int(self.textArea.index('end').split('.')[0]) * self.textArea.yview()[0])
 
 		# Calculate the click position relative to the text widget
-		click_line = int(event.y / font_height) + outsideViewsLines + 1
-		click_column = int(event.x / font_width) + outsideViewCols
+		clickLine = int(event.y / fontHeight) + outsideViewsLines + 1
+		clickColumn = int(event.x / fontWidth) + outsideViewCols
 
-		if click_line < 1 or click_column < 0:
+		if clickLine < 1 or clickColumn < 0:
 			return
 
 		# Add lines if necessary
-		num_lines = int(self.textArea.index('end').split('.')[0]) - 1
-		while click_line > num_lines:
+		numLines = int(self.textArea.index('end').split('.')[0]) - 1
+		while clickLine > numLines:
 			self.textArea.insert('end', "\n")
-			num_lines += 1
+			numLines += 1
 
 		# Add columns if necessary
-		num_columns = len(self.textArea.get(f"{click_line}.0", f"{click_line}.end"))
-		while click_column > num_columns:
-			self.textArea.insert(f"{click_line}.end", " ")
-			num_columns += 1
+		numColumns = len(self.textArea.get(f"{clickLine}.0", f"{clickLine}.end"))
+		while clickColumn > numColumns:
+			self.textArea.insert(f"{clickLine}.end", " ")
+			numColumns += 1
 
 		# If the click is not on a newline character, delete the existing character and insert 'x' at the click position
-		if not self.textArea.get(f"{click_line}.{click_column}") == '\n':
-			self.textArea.delete(f"{click_line}.{click_column}")
-		self.textArea.insert(f"{click_line}.{click_column}", 'x')
+		if self.mode == "draw":
+			if not self.textArea.get(f"{clickLine}.{clickColumn}") == '\n':
+				self.textArea.delete(f"{clickLine}.{clickColumn}")
+			self.textArea.insert(f"{clickLine}.{clickColumn}", 'x')
 
 
 drascii = Drascii(width=1280,height=720)
