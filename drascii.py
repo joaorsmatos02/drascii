@@ -78,7 +78,7 @@ class Drascii:
 
 		#######################################options (to be added on a menu later)#######################################################
 		
-		self.textArea.configure(font=("Consolas", 12))
+		self.textArea.configure(font=("Consolas", 12), cursor="tcross")
 
 		self.textArea.bind("<Button-1>", self.__handle_click)
 		self.textArea.bind("<B1-Motion>", self.__handle_click)
@@ -173,32 +173,35 @@ class Drascii:
 		font_height = font_object.metrics("linespace")
 		font_width = font_object.measure(" ")
 
-		# has to account for zoom
-		outsideViewX = max([len(self.textArea.get(f"{x}.0", f"{x}.end")) for x in range(0, int(self.textArea.index('end').split('.')[0]))]) * self.textArea.xview()[0]
-		outsideViewY = int(self.textArea.index('end').split('.')[0]) * self.textArea.yview()[0]
-		
-		click_line = int(event.y / font_height) + int(outsideViewY)
-		click_column = int(event.x / font_width) + int(outsideViewX)
-		
+		# Calculate the visible portion of the text
+		rowsPerColumn = [len(self.textArea.get(f"{x}.0", f"{x}.end")) for x in range(int(self.textArea.index('end').split('.')[0]))]
+		outsideViewCols = int(max(rowsPerColumn) * self.textArea.xview()[0])
+		outsideViewsLines = int(int(self.textArea.index('end').split('.')[0]) * self.textArea.yview()[0])
+
+		# Calculate the click position relative to the text widget
+		click_line = int(event.y / font_height) + outsideViewsLines + 1
+		click_column = int(event.x / font_width) + outsideViewCols
+
 		if click_line < 1 or click_column < 0:
 			return
 
-		# add lines
+		# Add lines if necessary
 		num_lines = int(self.textArea.index('end').split('.')[0]) - 1
-		print(num_lines)
 		while click_line > num_lines:
 			self.textArea.insert('end', "\n")
 			num_lines += 1
 
-		# add columns
+		# Add columns if necessary
 		num_columns = len(self.textArea.get(f"{click_line}.0", f"{click_line}.end"))
 		while click_column > num_columns:
 			self.textArea.insert(f"{click_line}.end", " ")
 			num_columns += 1
 
+		# If the click is not on a newline character, delete the existing character and insert 'x' at the click position
 		if not self.textArea.get(f"{click_line}.{click_column}") == '\n':
 			self.textArea.delete(f"{click_line}.{click_column}")
 		self.textArea.insert(f"{click_line}.{click_column}", 'x')
+
 
 drascii = Drascii(width=1280,height=720)
 drascii.run()
