@@ -22,6 +22,7 @@ class Drascii:
 	cursor = "tcross" # https://anzeljg.github.io/rin2/book2/2405/docs/tkinter/cursors.html
 
 	currentChar = ' '
+
 	drawBackgroundColor = "black"
 	drawForegroundColor = "white"
 	drawSelectedColor = "black"
@@ -153,38 +154,46 @@ class Drascii:
 		newWindow.geometry("720x360")
 
 		# Selector for mode
-		""" mode_label = Label(newWindow, text="Mode:")
+		mode_label = Label(newWindow, text="Mode:")
 		mode_label.grid(row=0, column=0)
 		modes = ["draw", "write"]
 		self.mode_var = StringVar(newWindow)
-		self.mode_var.set(self.mode)  # default value
-		mode_selector = OptionMenu(newWindow, self.mode_var, *modes, command=self.onModeSelect)
+		self.mode_var.set(self.mode)
+		mode_selector = OptionMenu(newWindow, self.mode_var, *modes, command=self.setMode)
 		mode_selector.grid(row=0, column=1)
 
 		# Selector for current font
 		font_label = Label(newWindow, text="Font:")
 		font_label.grid(row=1, column=0)
-		fonts = ["Consolas", "Arial", "Times New Roman"]  # Add more as needed
+		fonts = ["Consolas", "Arial", "Times New Roman"]
 		self.font_var = StringVar(newWindow)
-		self.font_var.set(self.currentFont)  # default value
-		font_selector = OptionMenu(newWindow, self.font_var, *fonts, command=self.onFontSelect)
-		font_selector.grid(row=1, column=1) """
+		self.font_var.set(self.currentFont)
+		font_selector = OptionMenu(newWindow, self.font_var, *fonts, command=self.setFont)
+		font_selector.grid(row=1, column=1)
 
 		# Selector for font size
 		size_label = Label(newWindow, text="Font Size:")
 		size_label.grid(row=2, column=0)
 		self.size_scale = Scale(newWindow, from_=8, to=24, orient=HORIZONTAL, command=self.onFontSizeDrag)
-		self.size_scale.set(self.fontSize)  # default value
+		self.size_scale.set(self.fontSize)
 		self.size_scale.grid(row=2, column=1)
 
 		# Selector for cursor
 		cursor_label = Label(newWindow, text="Cursor:")
 		cursor_label.grid(row=3, column=0)
-		cursors = ["arrow", "tcross", "hand2", "crosshair"]  # Add more as needed
+		cursors = ["arrow", "tcross", "hand2", "crosshair"]
 		self.cursor_var = StringVar(newWindow)
-		self.cursor_var.set(self.cursor)  # default value
+		self.cursor_var.set(self.cursor)
 		cursor_selector = OptionMenu(newWindow, self.cursor_var, *cursors, command=self.setCursor)
 		cursor_selector.grid(row=3, column=1)
+
+		# Selector for current char
+		char_label = Label(newWindow, text="Current Character:")
+		char_label.grid(row=4, column=0)
+		self.char_entry = Entry(newWindow)
+		self.char_entry.insert(0, self.currentChar)
+		self.char_entry.grid(row=4, column=1)
+		self.char_entry.bind("<FocusOut>", self.setCurrentChar)
 
 	def onFontSizeDrag(self, value):
 		current_value = int(value)
@@ -200,6 +209,10 @@ class Drascii:
 	def setCursor(self, value):
 		self.cursor = value
 		self.textArea.configure(cursor=self.cursor)
+
+	def setFont(self, value):
+		self.currentFont = value
+		self.textArea.configure(font=(value, self.fontSize))
 
 	def setBackground(self, color):
 		self.textArea.configure(bg=color)
@@ -227,8 +240,8 @@ class Drascii:
 		else:
 			self.zoomOut()
 
-	def changeMode(self):
-		if self.mode == "draw":
+	def setMode(self, mode=None):
+		if mode == "write" or (mode == None and self.mode == "draw"):
 			self.mode = "write"
 			self.setSelected(self.writeSelectedColor)
 			self.setInsert(self.writeInsertColor)
@@ -237,9 +250,12 @@ class Drascii:
 			self.setSelected(self.drawSelectedColor)
 			self.setInsert(self.drawInsertColor)
 
+	def setCurrentChar(self, event):
+		self.currentChar = self.char_entry.get()[1]
+	
 	def onKeyPressed(self, event):
 		if event.keysym == "F1":
-			self.changeMode()
+			self.setMode()
 		if event.char and event.char.isprintable():
 			self.currentChar = event.char
 		if self.mode == "draw":
