@@ -19,7 +19,7 @@ class Drascii:
 	mode = "draw"
 	currentFont = "Consolas"
 	fontSize = 12
-	cursor = "tcross"
+	cursor = "tcross" # https://anzeljg.github.io/rin2/book2/2405/docs/tkinter/cursors.html
 
 	currentChar = ' '
 	drawBackgroundColor = "black"
@@ -64,9 +64,9 @@ class Drascii:
 		self.fileMenu.add_command(label="New", command=self.__newFile) 
 		self.fileMenu.add_command(label="Open", command=self.__openFile)
 		self.fileMenu.add_command(label="Save", command=self.__saveFile) 
-
-
-		self.fileMenu.add_separator()										 
+		self.fileMenu.add_separator()
+		self.fileMenu.add_command(label="Settings", command=self.settingsMenu)
+		self.fileMenu.add_separator()								 
 		self.fileMenu.add_command(label="Exit", command=self.__quitApplication)
 		self.menuBar.add_cascade(label="File", menu=self.fileMenu)	 
 		
@@ -147,8 +147,59 @@ class Drascii:
 			file.write(self.textArea.get(1.0,END))
 			file.close()
 
+	def settingsMenu(self):
+		newWindow = Toplevel(self.root)
+		newWindow.title("Settings")
+		newWindow.geometry("720x360")
+
+		# Selector for mode
+		""" mode_label = Label(newWindow, text="Mode:")
+		mode_label.grid(row=0, column=0)
+		modes = ["draw", "write"]
+		self.mode_var = StringVar(newWindow)
+		self.mode_var.set(self.mode)  # default value
+		mode_selector = OptionMenu(newWindow, self.mode_var, *modes, command=self.onModeSelect)
+		mode_selector.grid(row=0, column=1)
+
+		# Selector for current font
+		font_label = Label(newWindow, text="Font:")
+		font_label.grid(row=1, column=0)
+		fonts = ["Consolas", "Arial", "Times New Roman"]  # Add more as needed
+		self.font_var = StringVar(newWindow)
+		self.font_var.set(self.currentFont)  # default value
+		font_selector = OptionMenu(newWindow, self.font_var, *fonts, command=self.onFontSelect)
+		font_selector.grid(row=1, column=1) """
+
+		# Selector for font size
+		size_label = Label(newWindow, text="Font Size:")
+		size_label.grid(row=2, column=0)
+		self.size_scale = Scale(newWindow, from_=8, to=24, orient=HORIZONTAL, command=self.onFontSizeDrag)
+		self.size_scale.set(self.fontSize)  # default value
+		self.size_scale.grid(row=2, column=1)
+
+		# Selector for cursor
+		cursor_label = Label(newWindow, text="Cursor:")
+		cursor_label.grid(row=3, column=0)
+		cursors = ["arrow", "tcross", "hand2", "crosshair"]  # Add more as needed
+		self.cursor_var = StringVar(newWindow)
+		self.cursor_var.set(self.cursor)  # default value
+		cursor_selector = OptionMenu(newWindow, self.cursor_var, *cursors, command=self.setCursor)
+		cursor_selector.grid(row=3, column=1)
+
+	def onFontSizeDrag(self, value):
+		current_value = int(value)
+		if current_value > self.fontSize:
+			self.zoomIn()
+		elif current_value < self.fontSize:
+			self.zoomOut()
+		self.fontSize = current_value
+
 	def run(self):
 		self.root.mainloop()
+
+	def setCursor(self, value):
+		self.cursor = value
+		self.textArea.configure(cursor=self.cursor)
 
 	def setBackground(self, color):
 		self.textArea.configure(bg=color)
