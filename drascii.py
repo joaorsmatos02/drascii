@@ -22,6 +22,7 @@ class Drascii:
 	cursor = "tcross" # https://anzeljg.github.io/rin2/book2/2405/docs/tkinter/cursors.html
 
 	currentChar = ' '
+	currentIndex = 0
 
 	drawBackgroundColor = "black"
 	drawForegroundColor = "white"
@@ -251,13 +252,15 @@ class Drascii:
 			self.setInsert(self.drawInsertColor)
 
 	def setCurrentChar(self, event):
-		self.currentChar = self.char_entry.get()[1]
+		self.currentChar = self.char_entry.get()[1:]
+		self.currentIndex = 0
 	
 	def onKeyPressed(self, event):
 		if event.keysym == "F1":
 			self.setMode()
 		if event.char and event.char.isprintable():
 			self.currentChar = event.char
+			self.currentIndex = 0
 		if self.mode == "draw":
 			return "break"
 		return None
@@ -295,7 +298,8 @@ class Drascii:
 		if self.mode == "draw":
 			if not self.textArea.get(f"{clickLine}.{clickColumn}") == '\n':
 				self.textArea.delete(f"{clickLine}.{clickColumn}")
-			self.textArea.insert(f"{clickLine}.{clickColumn}", self.currentChar[0])
+			self.textArea.insert(f"{clickLine}.{clickColumn}", self.currentChar[self.currentIndex])
+			self.currentIndex = (self.currentIndex + 1) % len(self.currentChar)
 
 		
 drascii = Drascii(width=1280,height=720)
