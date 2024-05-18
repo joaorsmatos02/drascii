@@ -21,7 +21,7 @@ class Drascii:
     mode = "draw"
     currentFont = "Consolas"
     fontSize = 12
-    cursor = "tcross" # https://anzeljg.github.io/rin2/book2/2405/docs/tkinter/cursors.html
+    cursor = "tcross"
 
     currentChar = ' '
     currentIndex = 0
@@ -79,7 +79,7 @@ class Drascii:
         self.menuBar.add_cascade(label="File", menu=self.fileMenu)
         
         # Help Menu
-        self.helpMenu.add_command(label="About Notepad", command=self.showAbout)
+        self.helpMenu.add_command(label="About Drascii", command=self.showAbout)
         self.menuBar.add_cascade(label="Help", menu=self.helpMenu)
 
         self.root.config(menu=self.menuBar)
@@ -145,7 +145,7 @@ class Drascii:
         exit()
 
     def showAbout(self):
-        showinfo("Drascii", "Mrinal Verma")
+        showinfo("Drascii", "Press any key and use it to draw!\n\nCTRL + || CTRL mouse wheel up -> zoom in\nCTRL - || CTRL mouse wheel down -> zoom out\nF1 -> change mode\n\nMade by João Matos in KRK, Polska")
 
     def openFile(self):
         self.file = askopenfilename(defaultextension=".txt",
@@ -200,7 +200,7 @@ class Drascii:
         # Selector for current font
         font_label = Label(newWindow, text="Font:")
         font_label.grid(row=2, column=0)
-        fonts = ["Consolas", "Arial", "Times New Roman"]
+        fonts = ["Consolas", "Monaco", "Lucida Console"]
         self.font_var = StringVar(newWindow)
         self.font_var.set(self.currentFont)
         font_selector = OptionMenu(newWindow, self.font_var, *fonts, command=self.setFont)
@@ -213,10 +213,11 @@ class Drascii:
         self.size_scale.set(self.fontSize)
         self.size_scale.grid(row=3, column=1)
 
+        # https://anzeljg.github.io/rin2/book2/2405/docs/tkinter/cursors.html
         # Selector for cursor
         cursor_label = Label(newWindow, text="Cursor:")
         cursor_label.grid(row=4, column=0)
-        cursors = ["arrow", "tcross", "hand2", "crosshair"]
+        cursors = ["arrow", "tcross", "man", "crosshair", "mouse", "boat", "pirate", "clock", "coffee_mug", "spider", "shuttle", "spraycan", "gobbler", "gumby", "umbrella", "watch"]
         self.cursor_var = StringVar(newWindow)
         self.cursor_var.set(self.cursor)
         cursor_selector = OptionMenu(newWindow, self.cursor_var, *cursors, command=self.setCursor)
@@ -231,9 +232,9 @@ class Drascii:
         self.char_entry.bind("<FocusOut>", self.setCurrentChar)
 
         # Checkbox for random char
-        self.random_char_var = BooleanVar(value=self.randomChar)
-        random_char_checkbox = Checkbutton(newWindow, text="Random Character", variable=self.randomChar, command=self.setRandomChar)
-        random_char_checkbox.grid(row=5, column=2)
+        self.randomCharVar = BooleanVar(value=self.randomChar)
+        randomCharCheckbox = Checkbutton(newWindow, text="Random Character", variable=self.randomCharVar, command=self.setRandomChar)
+        randomCharCheckbox.grid(row=5, column=2)
 
         def create_color_selector(label_text, row, color_attribute):
             def choose_color():
