@@ -188,53 +188,64 @@ class Drascii:
         newWindow.title("Settings")
         newWindow.geometry("720x360")
 
+        # Create a frame inside the new window with padding around it
+        main_frame = Frame(newWindow, padx=20, pady=20)
+        main_frame.pack(fill=BOTH, expand=True)
+
+        # Configure grid to have equal weight in each column and row
+        for i in range(5):
+            main_frame.grid_columnconfigure(i, weight=1)
+        for j in range(9):
+            main_frame.grid_rowconfigure(j, weight=1)
+
+        padding_options = {'padx': 5, 'pady': 5}
+
         # Selector for mode
-        mode_label = Label(newWindow, text="Mode:")
-        mode_label.grid(row=1, column=0)
+        mode_label = Label(main_frame, text="Mode:")
+        mode_label.grid(row=1, column=0, sticky="e", **padding_options)
         modes = ["draw", "write"]
-        self.mode_var = StringVar(newWindow)
+        self.mode_var = StringVar(main_frame)
         self.mode_var.set(self.mode)
-        mode_selector = OptionMenu(newWindow, self.mode_var, *modes, command=self.setMode)
-        mode_selector.grid(row=1, column=1)
+        mode_selector = OptionMenu(main_frame, self.mode_var, *modes, command=self.setMode)
+        mode_selector.grid(row=1, column=1, sticky="w", **padding_options)
 
         # Selector for current font
-        font_label = Label(newWindow, text="Font:")
-        font_label.grid(row=2, column=0)
+        font_label = Label(main_frame, text="Font:")
+        font_label.grid(row=2, column=0, sticky="e", **padding_options)
         fonts = ["Consolas", "Monaco", "Lucida Console"]
-        self.font_var = StringVar(newWindow)
+        self.font_var = StringVar(main_frame)
         self.font_var.set(self.currentFont)
-        font_selector = OptionMenu(newWindow, self.font_var, *fonts, command=self.setFont)
-        font_selector.grid(row=2, column=1)
+        font_selector = OptionMenu(main_frame, self.font_var, *fonts, command=self.setFont)
+        font_selector.grid(row=2, column=1, sticky="w", **padding_options)
 
         # Selector for font size
-        size_label = Label(newWindow, text="Font Size:")
-        size_label.grid(row=3, column=0)
-        self.size_scale = Scale(newWindow, from_=8, to=24, orient=HORIZONTAL, command=self.onFontSizeDrag)
+        size_label = Label(main_frame, text="Font Size:")
+        size_label.grid(row=3, column=0, sticky="e", **padding_options)
+        self.size_scale = Scale(main_frame, from_=8, to=24, orient=HORIZONTAL, command=self.onFontSizeDrag)
         self.size_scale.set(self.fontSize)
-        self.size_scale.grid(row=3, column=1)
+        self.size_scale.grid(row=3, column=1, sticky="w", **padding_options)
 
-        # https://anzeljg.github.io/rin2/book2/2405/docs/tkinter/cursors.html
         # Selector for cursor
-        cursor_label = Label(newWindow, text="Cursor:")
-        cursor_label.grid(row=4, column=0)
+        cursor_label = Label(main_frame, text="Cursor:")
+        cursor_label.grid(row=4, column=0, sticky="e", **padding_options)
         cursors = ["arrow", "tcross", "man", "crosshair", "mouse", "boat", "pirate", "clock", "coffee_mug", "spider", "shuttle", "spraycan", "gobbler", "gumby", "umbrella", "watch"]
-        self.cursor_var = StringVar(newWindow)
+        self.cursor_var = StringVar(main_frame)
         self.cursor_var.set(self.cursor)
-        cursor_selector = OptionMenu(newWindow, self.cursor_var, *cursors, command=self.setCursor)
-        cursor_selector.grid(row=4, column=1)
+        cursor_selector = OptionMenu(main_frame, self.cursor_var, *cursors, command=self.setCursor)
+        cursor_selector.grid(row=4, column=1, sticky="w", **padding_options)
 
         # Selector for current char
-        char_label = Label(newWindow, text="Current Character:")
-        char_label.grid(row=5, column=0)
-        self.char_entry = Entry(newWindow)
+        char_label = Label(main_frame, text="Current Character:")
+        char_label.grid(row=5, column=0, sticky="e", **padding_options)
+        self.char_entry = Entry(main_frame)
         self.char_entry.insert(0, self.currentChar)
-        self.char_entry.grid(row=5, column=1)
+        self.char_entry.grid(row=5, column=1, sticky="w", **padding_options)
         self.char_entry.bind("<FocusOut>", self.setCurrentChar)
 
         # Checkbox for random char
         self.randomCharVar = BooleanVar(value=self.randomChar)
-        randomCharCheckbox = Checkbutton(newWindow, text="Random Character", variable=self.randomCharVar, command=self.setRandomChar)
-        randomCharCheckbox.grid(row=5, column=2)
+        randomCharCheckbox = Checkbutton(main_frame, text="Random Character", variable=self.randomCharVar, command=self.setRandomChar)
+        randomCharCheckbox.grid(row=6, column=1, sticky="w", **padding_options)
 
         def create_color_selector(label_text, row, color_attribute):
             def choose_color():
@@ -247,10 +258,10 @@ class Drascii:
                     self.setSelected()
                     color_button.config(bg=color)
 
-            label = Label(newWindow, text=label_text)
-            label.grid(row=row, column=3)
-            color_button = Button(newWindow, bg=getattr(self, color_attribute), width=10, command=choose_color)
-            color_button.grid(row=row, column=4)
+            label = Label(main_frame, text=label_text)
+            label.grid(row=row, column=2, sticky="e", **padding_options)
+            color_button = Button(main_frame, bg=getattr(self, color_attribute), width=10, command=choose_color)
+            color_button.grid(row=row, column=4, sticky="w", **padding_options)
 
         create_color_selector("Draw Background Color:", 1, "drawBackgroundColor")
         create_color_selector("Draw Foreground Color:", 2, "drawForegroundColor")

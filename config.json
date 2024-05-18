@@ -1,10 +1,10 @@
 {
     "mode": "draw",
     "currentFont": "Monaco",
-    "fontSize": 6,
+    "fontSize": 18,
     "cursor": "spraycan",
-    "currentChar": "h",
-    "randomChar": false,
+    "currentChar": " ",
+    "randomChar": true,
     "drawBackgroundColor": "#969915",
     "drawForegroundColor": "#ffffff",
     "drawSelectedColor": "#969915",
