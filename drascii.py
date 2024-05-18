@@ -261,15 +261,6 @@ class Drascii:
         create_color_selector("Write Selected Color:", 7, "writeSelectedColor")
         create_color_selector("Write Insert Color:", 8, "writeInsertColor")
 
-    def onFontSizeDrag(self, value):
-        current_value = int(value)
-        if current_value > self.fontSize:
-            self.zoomIn()
-        elif current_value < self.fontSize:
-            self.zoomOut()
-        self.fontSize = current_value
-        self.saveSettings()
-
     def run(self):
         self.root.mainloop()
 
@@ -331,6 +322,15 @@ class Drascii:
             self.zoomIn()
         else:
             self.zoomOut()
+        self.saveSettings()
+
+    def onFontSizeDrag(self, value):
+        current_value = int(value)
+        if current_value > self.fontSize:
+            self.zoomIn()
+        elif current_value < self.fontSize:
+            self.zoomOut()
+        self.fontSize = current_value
         self.saveSettings()
 
     def setMode(self, mode=None):
