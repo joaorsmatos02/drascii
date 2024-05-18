@@ -3,6 +3,7 @@ from tkinter import *
 from tkinter.messagebox import *
 from tkinter.filedialog import *
 from tkinter import font
+import random
 
 class Drascii:
 
@@ -23,6 +24,7 @@ class Drascii:
 
 	currentChar = ' '
 	currentIndex = 0
+	randomChar = False
 	mouseHistory = []
 
 	drawBackgroundColor = "black"
@@ -64,48 +66,45 @@ class Drascii:
 		# Add controls (widget)
 		self.textArea.grid(sticky = N + E + S + W)
 		
-		self.fileMenu.add_command(label="New", command=self.__newFile) 
-		self.fileMenu.add_command(label="Open", command=self.__openFile)
-		self.fileMenu.add_command(label="Save", command=self.__saveFile) 
+		# File Menu
+		self.fileMenu.add_command(label="New", command=self.newFile) 
+		self.fileMenu.add_command(label="Open", command=self.openFile)
+		self.fileMenu.add_command(label="Save", command=self.saveFile) 
 		self.fileMenu.add_separator()
 		self.fileMenu.add_command(label="Settings", command=self.settingsMenu)
 		self.fileMenu.add_separator()								 
-		self.fileMenu.add_command(label="Exit", command=self.__quitApplication)
+		self.fileMenu.add_command(label="Exit", command=self.quitApplication)
 		self.menuBar.add_cascade(label="File", menu=self.fileMenu)	 
 		
-		self.helpMenu.add_command(label="About Notepad", command=self.__showAbout) 
+		# Help Menu
+		self.helpMenu.add_command(label="About Notepad", command=self.showAbout) 
 		self.menuBar.add_cascade(label="Help", menu=self.helpMenu)
 
 		self.root.config(menu=self.menuBar)
-
-		#######################################options (to be added on a menu later)#######################################################
 		
 		self.textArea.configure(font=(self.currentFont, self.fontSize), cursor=self.cursor)
-
-		self.textArea.bind("<Button-1>", self.handleClick)
-		self.textArea.bind("<B1-Motion>", self.handleClick)
-		self.textArea.bind("<ButtonRelease-1>", self.handleRelease)
 
 		self.setBackground(self.drawBackgroundColor)
 		self.setForeground(self.drawForegroundColor)
 		self.setSelected(self.drawSelectedColor)
 		self.setInsert(self.drawInsertColor)
 
+		self.textArea.bind("<Button-1>", self.handleClick)
+		self.textArea.bind("<B1-Motion>", self.handleClick)
+		self.textArea.bind("<ButtonRelease-1>", self.handleRelease)
+		self.textArea.bind("<KeyPress>", self.onKeyPressed)
 		self.root.bind("<Control-plus>", self.zoomIn)
 		self.root.bind("<Control-minus>", self.zoomOut)
 		self.root.bind("<Control-MouseWheel>", self.zoomWithMouseWheel)
-		self.textArea.bind("<KeyPress>", self.onKeyPressed)
-
-		#########################################################################################################################################
 		
-	def __quitApplication(self):
+	def quitApplication(self):
 		self.root.destroy()
 		exit()
 
-	def __showAbout(self):
+	def showAbout(self):
 		showinfo("Drascii","Mrinal Verma")
 
-	def __openFile(self):
+	def openFile(self):
 		self.file = askopenfilename(defaultextension=".txt",
 									filetypes=[("All Files","*.*"),
 										("Text Documents","*.txt")])
@@ -118,12 +117,12 @@ class Drascii:
 			self.textArea.insert(1.0,file.read())
 			file.close()
 	
-	def __newFile(self):
+	def newFile(self):
 		self.root.title("Untitled - Notepad")
 		self.file = None
 		self.textArea.delete(1.0,END)
 
-	def __saveFile(self):
+	def saveFile(self):
 		if self.file == None:
 			self.file = asksaveasfilename(initialfile='Untitled.txt',
 											defaultextension=".txt",
@@ -190,6 +189,11 @@ class Drascii:
 		self.char_entry.grid(row=4, column=1)
 		self.char_entry.bind("<FocusOut>", self.setCurrentChar)
 
+		# Checkbox for random char
+		self.random_char_var = BooleanVar(value=self.randomChar)
+		random_char_checkbox = Checkbutton(newWindow, text="Random Character", variable=self.randomChar, command=self.setRandomChar)
+		random_char_checkbox.grid(row=4, column=2)
+
 	def onFontSizeDrag(self, value):
 		current_value = int(value)
 		if current_value > self.fontSize:
@@ -221,6 +225,10 @@ class Drascii:
 	def setInsert(self, color):
 		self.textArea.configure(insertbackground=color)
 
+	def setRandomChar(self):
+		self.randomChar = not self.randomChar
+		self.currentIndex = 0
+
 	def zoomIn(self, event=None):
 		self.fontSize += 2
 		self.textArea.configure(font=(self.currentFont, self.fontSize))
@@ -246,7 +254,7 @@ class Drascii:
 			self.setInsert(self.drawInsertColor)
 
 	def setCurrentChar(self, event):
-		self.currentChar = self.char_entry.get()#[1:]
+		self.currentChar = self.char_entry.get()
 		self.currentIndex = 0
 	
 	def onKeyPressed(self, event):
@@ -272,7 +280,7 @@ class Drascii:
 		# Calculate the click position relative to the text widget
 		clickLine = int(event.y / fontHeight) + outsideViewsLines + 1
 		clickColumn = int(event.x / fontWidth) + outsideViewCols
-		if (clickLine, clickColumn) not in self.mouseHistory:
+		if (clickLine, clickColumn) not in self.mouseHistory: # if position hasnt been visited before in current click
 
 			self.mouseHistory.append((clickLine, clickColumn))
 
@@ -294,8 +302,11 @@ class Drascii:
 			if self.mode == "draw":
 				if not self.textArea.get(f"{clickLine}.{clickColumn}") == '\n':
 					self.textArea.delete(f"{clickLine}.{clickColumn}")
-				self.textArea.insert(f"{clickLine}.{clickColumn}", self.currentChar[self.currentIndex])
-				self.currentIndex = (self.currentIndex + 1) % len(self.currentChar)
+				if not self.randomChar:
+					self.textArea.insert(f"{clickLine}.{clickColumn}", self.currentChar[self.currentIndex])
+					self.currentIndex = (self.currentIndex + 1) % len(self.currentChar)
+				else:
+					self.textArea.insert(f"{clickLine}.{clickColumn}", chr(random.randint(33, 126)))
 
 	def handleRelease(self, event=None):
 		self.mouseHistory = []
