@@ -1,7 +1,7 @@
 {
-    "mode": "draw",
+    "mode": "write",
     "currentFont": "Monaco",
-    "fontSize": 18,
+    "fontSize": 8,
     "cursor": "spraycan",
     "currentChar": " ",
     "randomChar": true,

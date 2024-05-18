@@ -145,7 +145,7 @@ class Drascii:
         exit()
 
     def showAbout(self):
-        showinfo("Drascii", "Press any key and use it to draw!\n\nCTRL + || CTRL mouse wheel up -> zoom in\nCTRL - || CTRL mouse wheel down -> zoom out\nF1 -> change mode\n\nMade by João Matos in KRK, Polska")
+        showinfo("Drascii", "Press any key and use it to draw!\n\nF1 -> change mode\nMouse wheel -> scroll vertically\nShift mouse wheel -> scroll horizontally\nCTRL + || CTRL mouse wheel up -> zoom in\nCTRL - || CTRL mouse wheel down -> zoom out\n\nMade by João Matos in KRK, Polska")
 
     def openFile(self):
         self.file = askopenfilename(defaultextension=".txt",
