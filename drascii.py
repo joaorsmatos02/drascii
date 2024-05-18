@@ -23,6 +23,7 @@ class Drascii:
 
 	currentChar = ' '
 	currentIndex = 0
+	mouseHistory = []
 
 	drawBackgroundColor = "black"
 	drawForegroundColor = "white"
@@ -77,20 +78,13 @@ class Drascii:
 
 		self.root.config(menu=self.menuBar)
 
-		#self.verticalScroll.pack(side=RIGHT,fill=Y) 
-		#self.verticalScroll.config(command=self.textArea.yview)	 
-		#self.textArea.config(yscrollcommand=self.verticalScroll.set)
-
-		#self.horizontalScroll.pack(side=BOTTOM,fill=X) 
-		#self.horizontalScroll.config(command=self.textArea.xview)	 
-		#self.textArea.config(xscrollcommand=self.horizontalScroll.set)
-
 		#######################################options (to be added on a menu later)#######################################################
 		
 		self.textArea.configure(font=(self.currentFont, self.fontSize), cursor=self.cursor)
 
 		self.textArea.bind("<Button-1>", self.handleClick)
 		self.textArea.bind("<B1-Motion>", self.handleClick)
+		self.textArea.bind("<ButtonRelease-1>", self.handleRelease)
 
 		self.setBackground(self.drawBackgroundColor)
 		self.setForeground(self.drawForegroundColor)
@@ -252,7 +246,7 @@ class Drascii:
 			self.setInsert(self.drawInsertColor)
 
 	def setCurrentChar(self, event):
-		self.currentChar = self.char_entry.get()[1:]
+		self.currentChar = self.char_entry.get()#[1:]
 		self.currentIndex = 0
 	
 	def onKeyPressed(self, event):
@@ -278,28 +272,33 @@ class Drascii:
 		# Calculate the click position relative to the text widget
 		clickLine = int(event.y / fontHeight) + outsideViewsLines + 1
 		clickColumn = int(event.x / fontWidth) + outsideViewCols
+		if (clickLine, clickColumn) not in self.mouseHistory:
 
-		if clickLine < 1 or clickColumn < 0:
-			return
+			self.mouseHistory.append((clickLine, clickColumn))
 
-		# Add lines if necessary
-		numLines = int(self.textArea.index('end').split('.')[0]) - 1
-		while clickLine > numLines:
-			self.textArea.insert('end', "\n")
-			numLines += 1
+			if clickLine < 1 or clickColumn < 0:
+				return
 
-		# Add columns if necessary
-		numColumns = len(self.textArea.get(f"{clickLine}.0", f"{clickLine}.end"))
-		while clickColumn > numColumns:
-			self.textArea.insert(f"{clickLine}.end", " ")
-			numColumns += 1
+			# Add lines if necessary
+			numLines = int(self.textArea.index('end').split('.')[0]) - 1
+			while clickLine > numLines:
+				self.textArea.insert('end', "\n")
+				numLines += 1
 
-		# If the click is not on a newline character, delete the existing character and insert 'x' at the click position
-		if self.mode == "draw":
-			if not self.textArea.get(f"{clickLine}.{clickColumn}") == '\n':
-				self.textArea.delete(f"{clickLine}.{clickColumn}")
-			self.textArea.insert(f"{clickLine}.{clickColumn}", self.currentChar[self.currentIndex])
-			self.currentIndex = (self.currentIndex + 1) % len(self.currentChar)
+			# Add columns if necessary
+			numColumns = len(self.textArea.get(f"{clickLine}.0", f"{clickLine}.end"))
+			while clickColumn > numColumns:
+				self.textArea.insert(f"{clickLine}.end", " ")
+				numColumns += 1
+
+			if self.mode == "draw":
+				if not self.textArea.get(f"{clickLine}.{clickColumn}") == '\n':
+					self.textArea.delete(f"{clickLine}.{clickColumn}")
+				self.textArea.insert(f"{clickLine}.{clickColumn}", self.currentChar[self.currentIndex])
+				self.currentIndex = (self.currentIndex + 1) % len(self.currentChar)
+
+	def handleRelease(self, event=None):
+		self.mouseHistory = []
 
 		
 drascii = Drascii(width=1280,height=720)
