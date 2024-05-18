@@ -1,0 +1,16 @@
+{
+    "mode": "draw",
+    "currentFont": "Consolas",
+    "fontSize": 10,
+    "cursor": "tcross",
+    "currentChar": " !\"#$%",
+    "randomChar": false,
+    "drawBackgroundColor": "#bcbcbc",
+    "drawForegroundColor": "#9cff42",
+    "drawSelectedColor": "#bcbcbc",
+    "drawInsertColor": "#bcbcbc",
+    "writeBackgroundColor": "black",
+    "writeForegroundColor": "#bcbcbc",
+    "writeSelectedColor": "red",
+    "writeInsertColor": "#bcbcbc"
+}
